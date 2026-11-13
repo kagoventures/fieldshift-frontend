@@ -20,13 +20,8 @@ export default function DashboardPage({ navigate, showToast }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("farmer@spaceapps.org");
 
-  const [farmData, setFarmData] = useState({
-    resolvedLocation: "Loading Region...",
-    coordinates: { lat: 5.6037, lng: -0.187 },
-    currentCrop: "Maize",
-    fieldSize: 2.5,
-  });
-
+  const [error, setError] = useState("");
+  const [farmData, setFarmData] = useState(null);
   const [climateSummary, setClimateSummary] = useState(null);
   const [aiRecommendation, setAiRecommendation] = useState(null);
 
@@ -68,10 +63,12 @@ export default function DashboardPage({ navigate, showToast }) {
         );
       }
 
+      setError("");
       setFarmData(data.farm);
       setClimateSummary(data.climateSummary);
       setAiRecommendation(data.aiRecommendation);
     } catch (err) {
+      setError(err.message || "Failed to fetch personalized climate telemetry.");
       showToast(err.message, "error");
     } finally {
       setIsLoading(false);
@@ -133,6 +130,10 @@ export default function DashboardPage({ navigate, showToast }) {
                   Resolving Geocoded Region & Querying NASA Satellites...
                 </span>
               </div>
+            ) : error || !farmData ? (
+              <p className="page-status page-status-error" role="alert">
+                {error || "No farm data was returned."}
+              </p>
             ) : (
               <>
                 <div className="stats-grid">

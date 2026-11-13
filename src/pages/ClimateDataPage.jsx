@@ -22,19 +22,8 @@ export default function ClimateDataPage({ navigate, showToast }) {
   const [userEmail, setUserEmail] = useState("farmer@spaceapps.org");
 
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
-    lat: "",
-    lng: "",
-    locationName: "Loading...",
-    dataSource: "",
-    telemetry: { avgTemp: "--", totalRain: "--", avgSolar: "--" },
-    liveWeather: null,
-    supported: undefined,
-    message: null,
-    moisture: null,
-    provenance: null,
-    crops: null,
-  });
+  const [error, setError] = useState("");
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("field_shift_user");
@@ -65,6 +54,7 @@ export default function ClimateDataPage({ navigate, showToast }) {
           crops: ctx.aiRecommendation?.crops ?? null,
         });
       } catch (err) {
+        setError(err.message || "Failed to load telemetry.");
         if (showToast) showToast(err.message, "error");
       } finally {
         setLoading(false);
@@ -93,23 +83,29 @@ export default function ClimateDataPage({ navigate, showToast }) {
           <div className="climate-view">
             <div className="climate-header">
               <h1>Environmental Telemetry & Weather</h1>
-              <p>
-                Active Farm: <strong>{data.locationName}</strong> [{data.lat},{" "}
-                {data.lng}]
-              </p>
-              <div
-                style={{
-                  display: "inline-block",
-                  marginTop: "8px",
-                  padding: "4px 10px",
-                  background: "#065f46",
-                  color: "#34d399",
-                  borderRadius: "12px",
-                  fontSize: "0.85rem",
-                }}
-              >
-                📡 Source: {data.dataSource}
-              </div>
+              {data && (
+                <>
+                  <p>
+                    Active Farm: <strong>{data.locationName}</strong> [
+                    {data.lat}, {data.lng}]
+                  </p>
+                  {data.dataSource && (
+                    <div
+                      style={{
+                        display: "inline-block",
+                        marginTop: "8px",
+                        padding: "4px 10px",
+                        background: "#065f46",
+                        color: "#34d399",
+                        borderRadius: "12px",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      📡 Source: {data.dataSource}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {loading ? (
@@ -126,7 +122,11 @@ export default function ClimateDataPage({ navigate, showToast }) {
                 <Loader2 className="animate-spin" size={36} color="#10b981" />
                 <p>Gathering sensor and satellite metrics...</p>
               </div>
-            ) : (
+            ) : error ? (
+              <p className="page-status page-status-error" role="alert">
+                {error}
+              </p>
+            ) : data ? (
               <>
                 <h3
                   style={{
@@ -253,7 +253,7 @@ export default function ClimateDataPage({ navigate, showToast }) {
                   </p>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </main>
       </div>
