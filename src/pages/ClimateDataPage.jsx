@@ -11,9 +11,11 @@ import {
   Wind,
 } from "lucide-react";
 import "../styles/ClimateData.css";
-
-//const API_BASE_URL = "http://localhost:5000/api";
- const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
+import {
+  farmFromContext,
+  fetchSavedFarmContext,
+  telemetryFromContext,
+} from "../lib/farm";
 
 export default function ClimateDataPage({ navigate, showToast }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -21,12 +23,17 @@ export default function ClimateDataPage({ navigate, showToast }) {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
-    lat: "5.6037",
-    lng: "-0.1870",
+    lat: "",
+    lng: "",
     locationName: "Loading...",
     dataSource: "",
     telemetry: { avgTemp: "--", totalRain: "--", avgSolar: "--" },
     liveWeather: null,
+    supported: undefined,
+    message: null,
+    moisture: null,
+    provenance: null,
+    crops: null,
   });
 
   useEffect(() => {
@@ -42,16 +49,21 @@ export default function ClimateDataPage({ navigate, showToast }) {
 
     async function fetchData() {
       try {
-        const token = localStorage.getItem("field_shift_token");
-        const res = await fetch(`${API_BASE_URL}/data`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        const ctx = await fetchSavedFarmContext();
+        const farm = farmFromContext(ctx);
+        setData({
+          lat: farm.lat ?? "",
+          lng: farm.lng ?? "",
+          locationName: farm.locationName,
+          dataSource: ctx.dataSource || "",
+          telemetry: telemetryFromContext(ctx),
+          liveWeather: ctx.liveWeather || null,
+          supported: ctx.supported,
+          message: ctx.message ?? null,
+          moisture: ctx.moisture ?? null,
+          provenance: ctx.provenance ?? null,
+          crops: ctx.aiRecommendation?.crops ?? null,
         });
-        const json = await res.json();
-        if (res.ok && json.success) {
-          setData(json);
-        } else {
-          throw new Error(json.error || "Failed to load telemetry.");
-        }
       } catch (err) {
         if (showToast) showToast(err.message, "error");
       } finally {
@@ -59,7 +71,7 @@ export default function ClimateDataPage({ navigate, showToast }) {
       }
     }
     fetchData();
-  }, []);
+  }, [showToast]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -119,7 +131,7 @@ export default function ClimateDataPage({ navigate, showToast }) {
                 <h3
                   style={{
                     fontSize: "1.1rem",
-                    color: "black",
+                    color: "#0f172a",
                     margin: "1.5rem 0 0.75rem",
                   }}
                 >

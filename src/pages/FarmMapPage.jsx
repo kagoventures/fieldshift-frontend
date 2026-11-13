@@ -12,6 +12,7 @@ import {
 import { MapPin, Sliders, Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "../styles/FarmMap.css";
+import { farmFromContext, fetchSavedFarmContext } from "../lib/farm";
 
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
 
@@ -116,7 +117,26 @@ export default function FarmMapPage({ navigate, showToast }) {
     }
 
     fetchDashboardData();
+    loadSavedFarm();
   }, []);
+
+  const loadSavedFarm = async () => {
+    try {
+      const ctx = await fetchSavedFarmContext();
+      const farm = farmFromContext(ctx);
+      if (farm.lat != null && farm.lng != null) {
+        setTempLat(String(farm.lat));
+        setTempLng(String(farm.lng));
+      }
+      if (farm.locationName) setLocationName(farm.locationName);
+      if (farm.currentCrop) setTempCrop(farm.currentCrop);
+      if (farm.fieldSize != null) {
+        setTempSize(String(farm.fieldSize).replace(/ Hectares/i, ""));
+      }
+    } catch (err) {
+      console.error("Failed to load saved farm:", err);
+    }
+  };
 
   const handlePreset = (name, lat, lng) => {
     setTempLat(lat.toString());
