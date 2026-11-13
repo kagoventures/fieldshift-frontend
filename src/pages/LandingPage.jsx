@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "../styles/LandingPage.css";
 
-export default function LandingPage({ navigate, showToast }) {
+export default function LandingPage({ navigate }) {
   return (
     <div className="landing-container">
       {/* Navbar */}
@@ -26,13 +26,7 @@ export default function LandingPage({ navigate, showToast }) {
         </div>
 
         <div className="nav-actions">
-          <button
-            className="btn-secondary"
-            onClick={() => {
-              navigate("auth");
-              showToast("Signed in as Farmer successfully.", "success");
-            }}
-          >
+          <button className="btn-secondary" onClick={() => navigate("/auth")}>
             Sign In
           </button>
         </div>
@@ -63,20 +57,11 @@ export default function LandingPage({ navigate, showToast }) {
         <div className="hero-cta-group">
           <button
             className="btn-hero-main"
-            onClick={() => {
-            //   navigate("dashboard");
-              showToast("sign in!", "error");
-            }}
+            onClick={() => navigate("/dashboard")}
           >
             Explore Dashboard <ArrowRight size={18} />
           </button>
-          <button
-            className="btn-secondary"
-            onClick={() => {
-            //   navigate("dashboard");
-              showToast("sign in!", "error");
-            }}
-          >
+          <button className="btn-secondary" onClick={() => navigate("/auth")}>
             Farmer Portal Log In
           </button>
         </div>
