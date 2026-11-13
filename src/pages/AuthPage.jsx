@@ -72,7 +72,7 @@ export default function AuthPage({ navigate, showToast, onAuthSuccess }) {
         );
       } else {
         showToast(
-          "Successfully signed in to NASA Agroclimate Portal.",
+          "Successfully signed in to FieldShift.",
           "success",
         );
       }

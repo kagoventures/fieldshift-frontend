@@ -49,9 +49,9 @@ export default function LandingPage({ navigate }) {
 
         <p className="hero-description">
           Field Shift bridges satellite earth observations with machine learning
-          predictions. Drop a pin on any field to process daily NASA POWER
-          temperature, rainfall, and solar metrics to recommend high-yield,
-          resilient crop rotations.
+          predictions. Drop a pin on a field to read NASA POWER temperature,
+          rainfall, and solar data and review crop rotations that fit that
+          climate.
         </p>
 
         <div className="hero-cta-group">
@@ -74,9 +74,9 @@ export default function LandingPage({ navigate }) {
           <div className="stat-label">Gridded Meteorological Data Source</div>
         </div>
         <div className="stat-card">
-          <div className="stat-number">+22%</div>
+          <div className="stat-number">Crop fit</div>
           <div className="stat-label">
-            Projected Yield Boost via Crop Rotation
+            Suggestions follow local climate, not a promised yield gain
           </div>
         </div>
         <div className="stat-card">
@@ -86,8 +86,10 @@ export default function LandingPage({ navigate }) {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-number">35%</div>
-          <div className="stat-label">Water Efficiency Improvement</div>
+          <div className="stat-number">Rainfall</div>
+          <div className="stat-label">
+            Water guidance from measured rain, not a fixed savings figure
+          </div>
         </div>
       </section>
 
