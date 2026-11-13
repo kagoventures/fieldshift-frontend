@@ -11,6 +11,7 @@ import {
   Wind,
 } from "lucide-react";
 import "../styles/ClimateData.css";
+import AssessmentDetails from "../components/AssessmentDetails";
 import {
   farmFromContext,
   fetchSavedFarmContext,
@@ -242,6 +243,14 @@ export default function ClimateDataPage({ navigate, showToast }) {
                     </div>
                   </>
                 )}
+
+                <AssessmentDetails
+                  supported={data.supported}
+                  message={data.message}
+                  provenance={data.provenance}
+                  moisture={data.moisture}
+                  crops={data.crops}
+                />
 
                 <div className="sentinel-card" style={{ marginTop: "2rem" }}>
                   <h3 className="sentinel-title">

@@ -10,6 +10,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import "../styles/AiRecommendations.css";
+import AssessmentDetails from "../components/AssessmentDetails";
 
 // const API_BASE_URL = "http://localhost:5000/api";
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
@@ -217,7 +218,11 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
                     <ArrowRight size={22} color="#10b981" />
                     <div className="rotation-box highlight">
                       <span>AI Recommended Target</span>
-                      <span>{result.recommendedCrop}</span>
+                      <span>
+                        {result.supported === false
+                          ? "Outside Ghana"
+                          : result.recommendedCrop}
+                      </span>
                     </div>
                   </div>
 
@@ -233,6 +238,14 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
                     Engine: {result.modelEngine}
                   </div>
                 </div>
+
+                <AssessmentDetails
+                  supported={result.supported}
+                  message={result.message}
+                  provenance={result.provenance}
+                  moisture={result.moisture}
+                  crops={result.crops}
+                />
 
                 <div className="ai-metrics-grid">
                   <div className="ai-metric-box">

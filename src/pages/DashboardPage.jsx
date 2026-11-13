@@ -10,6 +10,7 @@ import {
   CloudSun,
 } from "lucide-react";
 import "../styles/Dashboard.css";
+import AssessmentDetails from "../components/AssessmentDetails";
 
 // const API_BASE_URL = "http://localhost:5000/api";
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api"
@@ -24,6 +25,7 @@ export default function DashboardPage({ navigate, showToast }) {
   const [farmData, setFarmData] = useState(null);
   const [climateSummary, setClimateSummary] = useState(null);
   const [aiRecommendation, setAiRecommendation] = useState(null);
+  const [assessment, setAssessment] = useState(null);
 
   // Ref guard to prevent double-fetching or infinite loops on re-mounts
   const hasFetchedRef = useRef(false);
@@ -67,6 +69,12 @@ export default function DashboardPage({ navigate, showToast }) {
       setFarmData(data.farm);
       setClimateSummary(data.climateSummary);
       setAiRecommendation(data.aiRecommendation);
+      setAssessment({
+        supported: data.supported,
+        message: data.message,
+        provenance: data.provenance,
+        moisture: data.moisture,
+      });
     } catch (err) {
       setError(err.message || "Failed to fetch personalized climate telemetry.");
       showToast(err.message, "error");
@@ -188,7 +196,9 @@ export default function DashboardPage({ navigate, showToast }) {
                       className="stat-value"
                       style={{ color: "#059669", fontSize: "18px" }}
                     >
-                      {aiRecommendation?.crop}
+                      {assessment?.supported === false
+                        ? "Outside Ghana"
+                        : aiRecommendation?.crop}
                     </div>
                     <span
                       className="stat-footer-tag"
@@ -198,6 +208,14 @@ export default function DashboardPage({ navigate, showToast }) {
                     </span>
                   </div>
                 </div>
+
+                <AssessmentDetails
+                  supported={assessment?.supported}
+                  message={assessment?.message}
+                  provenance={assessment?.provenance}
+                  moisture={assessment?.moisture}
+                  crops={aiRecommendation?.crops}
+                />
 
                 <div className="action-card">
                   <h3 className="action-card-title">Quick Navigation</h3>
