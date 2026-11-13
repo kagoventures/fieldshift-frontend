@@ -32,6 +32,18 @@
   line-height: 1.5;
 }
 
+.dashboard-farm-note {
+  margin: 12px 0 0;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 /* Metric / Stat Boxes */
 .stats-grid {
   display: grid;

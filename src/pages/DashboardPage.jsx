@@ -104,6 +104,10 @@ export default function DashboardPage({ navigate, showToast }) {
                 for your registered region and processed through our trained
                 decision tree classifier.
               </p>
+              <p className="dashboard-farm-note">
+                This overview is your registered primary farm. The Map page is
+                for checking other places.
+              </p>
             </div>
 
             {isLoading ? (
