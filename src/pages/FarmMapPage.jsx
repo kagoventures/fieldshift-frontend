@@ -13,6 +13,7 @@ import { MapPin, Sliders, Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "../styles/FarmMap.css";
 import { farmFromContext, fetchSavedFarmContext } from "../lib/farm";
+import { demoFarm, disableDemoMode, isDemoMode } from "../lib/demo";
 
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
 
@@ -94,6 +95,15 @@ export default function FarmMapPage({ navigate, showToast }) {
     setLoadState("loading");
     setLoadError("");
     try {
+      if (isDemoMode()) {
+        setTempLat(String(demoFarm.coordinates.lat));
+        setTempLng(String(demoFarm.coordinates.lng));
+        setLocationName(demoFarm.resolvedLocation);
+        setTempCrop(demoFarm.currentCrop);
+        setTempSize(String(demoFarm.fieldSize));
+        setLoadState("ready");
+        return;
+      }
       const ctx = await fetchSavedFarmContext();
       const farm = farmFromContext(ctx);
       if (farm.lat != null && farm.lng != null) {
@@ -124,6 +134,12 @@ export default function FarmMapPage({ navigate, showToast }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isDemoMode()) {
+      if (showToast) {
+        showToast("Guest demo does not save. Sign in to store a farm.", "info");
+      }
+      return;
+    }
     setIsSaving(true);
 
     const parsedLat = parseFloat(tempLat);
@@ -182,6 +198,7 @@ export default function FarmMapPage({ navigate, showToast }) {
   };
 
   const handleLogout = () => {
+    disableDemoMode();
     sessionStorage.clear();
     localStorage.removeItem("field_shift_token");
     localStorage.removeItem("field_shift_user");

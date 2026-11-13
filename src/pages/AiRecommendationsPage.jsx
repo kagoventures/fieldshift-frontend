@@ -11,6 +11,13 @@ import {
 } from "lucide-react";
 import "../styles/AiRecommendations.css";
 import AssessmentDetails from "../components/AssessmentDetails";
+import {
+  demoAiResult,
+  demoClimateSummary,
+  demoFarmDetails,
+  disableDemoMode,
+  isDemoMode,
+} from "../lib/demo";
 
 // const API_BASE_URL = "http://localhost:5000/api";
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
@@ -39,6 +46,14 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
     }
 
     // Check if we already fetched this session to prevent remount loops
+    if (isDemoMode()) {
+      setFarmData(demoFarmDetails);
+      setClimateSummary(demoClimateSummary);
+      setResult(demoAiResult);
+      setLoading(false);
+      return;
+    }
+
     const cachedData = sessionStorage.getItem("field_shift_ai_cache");
     if (cachedData) {
       try {
@@ -58,6 +73,14 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
 
   const fetchInferenceData = async (isManualRefresh = false) => {
     setLoading(true);
+    if (isDemoMode()) {
+      setError("");
+      setFarmData(demoFarmDetails);
+      setClimateSummary(demoClimateSummary);
+      setResult(demoAiResult);
+      setLoading(false);
+      return;
+    }
     const token = localStorage.getItem("field_shift_token");
 
     try {
@@ -123,6 +146,7 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
   };
 
   const handleLogout = () => {
+    disableDemoMode();
     sessionStorage.clear();
     localStorage.removeItem("field_shift_token");
     localStorage.removeItem("field_shift_user");

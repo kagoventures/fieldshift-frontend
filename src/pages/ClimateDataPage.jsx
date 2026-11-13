@@ -13,6 +13,7 @@ import {
 import "../styles/ClimateData.css";
 import AssessmentDetails from "../components/AssessmentDetails";
 import ClimateChart from "../components/ClimateChart";
+import { demoClimatePage, disableDemoMode, isDemoMode } from "../lib/demo";
 import {
   farmFromContext,
   fetchSavedFarmContext,
@@ -40,6 +41,11 @@ export default function ClimateDataPage({ navigate, showToast }) {
 
     async function fetchData() {
       try {
+        if (isDemoMode()) {
+          setError("");
+          setData(demoClimatePage);
+          return;
+        }
         const ctx = await fetchSavedFarmContext();
         const farm = farmFromContext(ctx);
         setData({
@@ -66,6 +72,7 @@ export default function ClimateDataPage({ navigate, showToast }) {
   }, [showToast]);
 
   const handleLogout = () => {
+    disableDemoMode();
     localStorage.clear();
     navigate("landing");
   };

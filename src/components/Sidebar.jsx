@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   Satellite,
+  Info,
 } from "lucide-react";
 import "../styles/Sidebar.css";
 
@@ -32,6 +33,7 @@ export default function Sidebar({
       label: "AI Crop Rotation",
       icon: <BrainCircuit size={20} />,
     },
+    { id: "about", label: "About", icon: <Info size={20} /> },
   ];
 
   const handleNavClick = (pageId) => {

@@ -11,6 +11,14 @@ import {
 } from "lucide-react";
 import "../styles/Dashboard.css";
 import AssessmentDetails from "../components/AssessmentDetails";
+import {
+  demoAi,
+  demoAssessment,
+  demoClimateSummary,
+  demoFarm,
+  disableDemoMode,
+  isDemoMode,
+} from "../lib/demo";
 
 // const API_BASE_URL = "http://localhost:5000/api";
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api"
@@ -49,6 +57,15 @@ export default function DashboardPage({ navigate, showToast }) {
 
   const fetchDashboardData = async () => {
     setIsLoading(true);
+    if (isDemoMode()) {
+      setError("");
+      setFarmData(demoFarm);
+      setClimateSummary(demoClimateSummary);
+      setAiRecommendation(demoAi);
+      setAssessment(demoAssessment);
+      setIsLoading(false);
+      return;
+    }
     const token = localStorage.getItem("field_shift_token");
 
     try {
@@ -84,6 +101,7 @@ export default function DashboardPage({ navigate, showToast }) {
   };
 
   const handleLogout = () => {
+    disableDemoMode();
     localStorage.removeItem("field_shift_token");
     localStorage.removeItem("field_shift_user");
     navigate("landing");
