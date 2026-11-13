@@ -58,6 +58,43 @@
   margin-top: 4px;
 }
 
+.climate-chart-block {
+  margin-top: 8px;
+}
+
+.climate-chart-heading {
+  font-size: 1.1rem;
+  color: #0f172a;
+  margin: 0.5rem 0 0.35rem;
+}
+
+.climate-chart-note {
+  margin: 0 0 12px;
+  color: #475569;
+  font-size: 13px;
+}
+
+.climate-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.climate-chart-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 12px 4px;
+  min-height: 220px;
+}
+
+.climate-chart-caption {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
 .sentinel-card {
   background: #1e293b;
   border: 1px solid #334155;

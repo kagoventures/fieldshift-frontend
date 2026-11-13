@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import "../styles/ClimateData.css";
 import AssessmentDetails from "../components/AssessmentDetails";
+import ClimateChart from "../components/ClimateChart";
 import {
   farmFromContext,
   fetchSavedFarmContext,
@@ -182,6 +183,8 @@ export default function ClimateDataPage({ navigate, showToast }) {
                     </div>
                   </div>
                 </div>
+
+                <ClimateChart telemetry={data.telemetry} />
 
                 {data.liveWeather && (
                   <>
