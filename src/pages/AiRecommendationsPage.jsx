@@ -10,36 +10,27 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import "../styles/AiRecommendations.css";
+import AssessmentDetails from "../components/AssessmentDetails";
+import {
+  demoAiResult,
+  demoClimateSummary,
+  demoFarmDetails,
+  disableDemoMode,
+  isDemoMode,
+} from "../lib/demo";
 
 // const API_BASE_URL = "http://localhost:5000/api";
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
 
 export default function AiRecommendationsPage({ navigate, showToast }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [userEmail, setUserEmail] = useState("farmer@spaceapps.org");
 
-  const [farmData, setFarmData] = useState({
-    currentCrop: "Maize",
-    fieldSize: "2.5 Hectares",
-    locationName: "Accra Test Field",
-    coordinates: { lat: 5.6037, lng: -0.187 },
-  });
-
-  const [climateSummary, setClimateSummary] = useState({
-    averageTemperatureC: 26.6,
-    totalPrecipitationMm: 1644.1,
-    averageSolarRadiation: 17.13,
-  });
-
-  const [result, setResult] = useState({
-    recommendedCrop: "Analyzing...",
-    confidence: "Dynamic Leaf Assessment",
-    yieldImpact: "+24%",
-    waterEfficiency: "+38%",
-    reasoning: "Fetching localized NASA POWER meteorological data...",
-    modelEngine: "",
-  });
+  const [farmData, setFarmData] = useState(null);
+  const [climateSummary, setClimateSummary] = useState(null);
+  const [result, setResult] = useState(null);
 
   useEffect(() => {
     // Load user email/username from local storage
@@ -55,6 +46,14 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
     }
 
     // Check if we already fetched this session to prevent remount loops
+    if (isDemoMode()) {
+      setFarmData(demoFarmDetails);
+      setClimateSummary(demoClimateSummary);
+      setResult(demoAiResult);
+      setLoading(false);
+      return;
+    }
+
     const cachedData = sessionStorage.getItem("field_shift_ai_cache");
     if (cachedData) {
       try {
@@ -74,6 +73,14 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
 
   const fetchInferenceData = async (isManualRefresh = false) => {
     setLoading(true);
+    if (isDemoMode()) {
+      setError("");
+      setFarmData(demoFarmDetails);
+      setClimateSummary(demoClimateSummary);
+      setResult(demoAiResult);
+      setLoading(false);
+      return;
+    }
     const token = localStorage.getItem("field_shift_token");
 
     try {
@@ -88,19 +95,23 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
         throw new Error(data.error || "Failed to run ml-cart inference.");
       }
 
-      const newFarmData = data.farmDetails || farmData;
-      const newClimateSummary = data.climateSummary || climateSummary;
+      const newFarmData = data.farmDetails || null;
+      const newClimateSummary = data.climateSummary || null;
       const newResult = {
         recommendedCrop:
-          data.aiRecommendation?.suggestedAdaptiveCrop ||
-          "Maize / Plantain Intercrop",
-        confidence: data.aiRecommendation?.confidenceScore || "95.4%",
-        yieldImpact: "+26%",
-        waterEfficiency: "+40%",
+          data.aiRecommendation?.suggestedAdaptiveCrop || "—",
+        confidence: data.aiRecommendation?.confidenceScore || "",
         reasoning: data.aiRecommendation?.reasoning || "",
         modelEngine: data.aiRecommendation?.modelEngine || "",
+        supported: data.supported,
+        message: data.message,
+        provenance: data.provenance,
+        moisture: data.moisture,
+        crops: data.aiRecommendation?.crops,
+        confidenceValue: data.aiRecommendation?.confidence,
       };
 
+      setError("");
       setFarmData(newFarmData);
       setClimateSummary(newClimateSummary);
       setResult(newResult);
@@ -122,6 +133,7 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
         );
       }
     } catch (err) {
+      setError(err.message || "Failed to run ml-cart inference.");
       if (showToast) showToast(err.message, "error");
     } finally {
       setLoading(false);
@@ -134,6 +146,7 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
   };
 
   const handleLogout = () => {
+    disableDemoMode();
     sessionStorage.clear();
     localStorage.removeItem("field_shift_token");
     localStorage.removeItem("field_shift_user");
@@ -186,7 +199,7 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
               </button>
             </div>
 
-            {loading && !climateSummary ? (
+            {loading && !result ? (
               <div
                 style={{
                   display: "flex",
@@ -210,7 +223,11 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
                   Evaluating agroclimate metrics through decision tree...
                 </span>
               </div>
-            ) : (
+            ) : error && !result ? (
+              <p className="page-status page-status-error" role="alert">
+                {error}
+              </p>
+            ) : result && farmData && climateSummary ? (
               <>
                 <div className="ai-strategy-card">
                   <span className="ai-tag-label">
@@ -225,7 +242,11 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
                     <ArrowRight size={22} color="#10b981" />
                     <div className="rotation-box highlight">
                       <span>AI Recommended Target</span>
-                      <span>{result.recommendedCrop}</span>
+                      <span>
+                        {result.supported === false
+                          ? "Outside Ghana"
+                          : result.recommendedCrop}
+                      </span>
                     </div>
                   </div>
 
@@ -241,6 +262,14 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
                     Engine: {result.modelEngine}
                   </div>
                 </div>
+
+                <AssessmentDetails
+                  supported={result.supported}
+                  message={result.message}
+                  provenance={result.provenance}
+                  moisture={result.moisture}
+                  crops={result.crops}
+                />
 
                 <div className="ai-metrics-grid">
                   <div className="ai-metric-box">
@@ -263,7 +292,7 @@ export default function AiRecommendationsPage({ navigate, showToast }) {
                   </div>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </main>
       </div>

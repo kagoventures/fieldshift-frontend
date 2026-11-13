@@ -6,6 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import FarmMapPage from "./pages/FarmMapPage";
 import ClimateDataPage from "./pages/ClimateDataPage";
 import AiRecommendationsPage from "./pages/AiRecommendationsPage";
+import AboutPage from "./pages/AboutPage";
 import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 import "./App.css";
 
@@ -52,6 +53,7 @@ export default function App() {
           path="/"
           element={<LandingPage navigate={navigate} showToast={showToast} />}
         />
+        <Route path="/about" element={<AboutPage navigate={navigate} />} />
         <Route
           path="/auth"
           element={

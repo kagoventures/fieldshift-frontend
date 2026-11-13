@@ -11,23 +11,22 @@ import {
   Wind,
 } from "lucide-react";
 import "../styles/ClimateData.css";
-
-//const API_BASE_URL = "http://localhost:5000/api";
- const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
+import AssessmentDetails from "../components/AssessmentDetails";
+import ClimateChart from "../components/ClimateChart";
+import { demoClimatePage, disableDemoMode, isDemoMode } from "../lib/demo";
+import {
+  farmFromContext,
+  fetchSavedFarmContext,
+  telemetryFromContext,
+} from "../lib/farm";
 
 export default function ClimateDataPage({ navigate, showToast }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("farmer@spaceapps.org");
 
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
-    lat: "5.6037",
-    lng: "-0.1870",
-    locationName: "Loading...",
-    dataSource: "",
-    telemetry: { avgTemp: "--", totalRain: "--", avgSolar: "--" },
-    liveWeather: null,
-  });
+  const [error, setError] = useState("");
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("field_shift_user");
@@ -42,26 +41,38 @@ export default function ClimateDataPage({ navigate, showToast }) {
 
     async function fetchData() {
       try {
-        const token = localStorage.getItem("field_shift_token");
-        const res = await fetch(`${API_BASE_URL}/data`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const json = await res.json();
-        if (res.ok && json.success) {
-          setData(json);
-        } else {
-          throw new Error(json.error || "Failed to load telemetry.");
+        if (isDemoMode()) {
+          setError("");
+          setData(demoClimatePage);
+          return;
         }
+        const ctx = await fetchSavedFarmContext();
+        const farm = farmFromContext(ctx);
+        setData({
+          lat: farm.lat ?? "",
+          lng: farm.lng ?? "",
+          locationName: farm.locationName,
+          dataSource: ctx.dataSource || "",
+          telemetry: telemetryFromContext(ctx),
+          liveWeather: ctx.liveWeather || null,
+          supported: ctx.supported,
+          message: ctx.message ?? null,
+          moisture: ctx.moisture ?? null,
+          provenance: ctx.provenance ?? null,
+          crops: ctx.aiRecommendation?.crops ?? null,
+        });
       } catch (err) {
+        setError(err.message || "Failed to load telemetry.");
         if (showToast) showToast(err.message, "error");
       } finally {
         setLoading(false);
       }
     }
     fetchData();
-  }, []);
+  }, [showToast]);
 
   const handleLogout = () => {
+    disableDemoMode();
     localStorage.clear();
     navigate("landing");
   };
@@ -81,23 +92,29 @@ export default function ClimateDataPage({ navigate, showToast }) {
           <div className="climate-view">
             <div className="climate-header">
               <h1>Environmental Telemetry & Weather</h1>
-              <p>
-                Active Farm: <strong>{data.locationName}</strong> [{data.lat},{" "}
-                {data.lng}]
-              </p>
-              <div
-                style={{
-                  display: "inline-block",
-                  marginTop: "8px",
-                  padding: "4px 10px",
-                  background: "#065f46",
-                  color: "#34d399",
-                  borderRadius: "12px",
-                  fontSize: "0.85rem",
-                }}
-              >
-                📡 Source: {data.dataSource}
-              </div>
+              {data && (
+                <>
+                  <p>
+                    Active Farm: <strong>{data.locationName}</strong> [
+                    {data.lat}, {data.lng}]
+                  </p>
+                  {data.dataSource && (
+                    <div
+                      style={{
+                        display: "inline-block",
+                        marginTop: "8px",
+                        padding: "4px 10px",
+                        background: "#065f46",
+                        color: "#34d399",
+                        borderRadius: "12px",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      📡 Source: {data.dataSource}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {loading ? (
@@ -114,12 +131,16 @@ export default function ClimateDataPage({ navigate, showToast }) {
                 <Loader2 className="animate-spin" size={36} color="#10b981" />
                 <p>Gathering sensor and satellite metrics...</p>
               </div>
-            ) : (
+            ) : error ? (
+              <p className="page-status page-status-error" role="alert">
+                {error}
+              </p>
+            ) : data ? (
               <>
                 <h3
                   style={{
                     fontSize: "1.1rem",
-                    color: "black",
+                    color: "#0f172a",
                     margin: "1.5rem 0 0.75rem",
                   }}
                 >
@@ -169,6 +190,8 @@ export default function ClimateDataPage({ navigate, showToast }) {
                     </div>
                   </div>
                 </div>
+
+                <ClimateChart telemetry={data.telemetry} />
 
                 {data.liveWeather && (
                   <>
@@ -231,6 +254,14 @@ export default function ClimateDataPage({ navigate, showToast }) {
                   </>
                 )}
 
+                <AssessmentDetails
+                  supported={data.supported}
+                  message={data.message}
+                  provenance={data.provenance}
+                  moisture={data.moisture}
+                  crops={data.crops}
+                />
+
                 <div className="sentinel-card" style={{ marginTop: "2rem" }}>
                   <h3 className="sentinel-title">
                     <Activity size={18} color="#10b981" /> Sentinel Cleaning
@@ -241,7 +272,7 @@ export default function ClimateDataPage({ navigate, showToast }) {
                   </p>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </main>
       </div>

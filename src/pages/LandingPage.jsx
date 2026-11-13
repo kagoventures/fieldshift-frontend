@@ -9,8 +9,9 @@ import {
   MapPin,
 } from "lucide-react";
 import "../styles/LandingPage.css";
+import { enableDemoMode } from "../lib/demo";
 
-export default function LandingPage({ navigate, showToast }) {
+export default function LandingPage({ navigate }) {
   return (
     <div className="landing-container">
       {/* Navbar */}
@@ -26,13 +27,10 @@ export default function LandingPage({ navigate, showToast }) {
         </div>
 
         <div className="nav-actions">
-          <button
-            className="btn-secondary"
-            onClick={() => {
-              navigate("auth");
-              showToast("Signed in as Farmer successfully.", "success");
-            }}
-          >
+          <button className="btn-secondary" onClick={() => navigate("/about")}>
+            About
+          </button>
+          <button className="btn-secondary" onClick={() => navigate("/auth")}>
             Sign In
           </button>
         </div>
@@ -55,29 +53,29 @@ export default function LandingPage({ navigate, showToast }) {
 
         <p className="hero-description">
           Field Shift bridges satellite earth observations with machine learning
-          predictions. Drop a pin on any field to process daily NASA POWER
-          temperature, rainfall, and solar metrics to recommend high-yield,
-          resilient crop rotations.
+          predictions. Drop a pin on a field to read NASA POWER temperature,
+          rainfall, and solar data and review crop rotations that fit that
+          climate.
         </p>
 
         <div className="hero-cta-group">
           <button
             className="btn-hero-main"
-            onClick={() => {
-            //   navigate("dashboard");
-              showToast("sign in!", "error");
-            }}
+            onClick={() => navigate("/dashboard")}
           >
             Explore Dashboard <ArrowRight size={18} />
+          </button>
+          <button className="btn-secondary" onClick={() => navigate("/auth")}>
+            Farmer Portal Log In
           </button>
           <button
             className="btn-secondary"
             onClick={() => {
-            //   navigate("dashboard");
-              showToast("sign in!", "error");
+              enableDemoMode();
+              navigate("/dashboard");
             }}
           >
-            Farmer Portal Log In
+            Try guest demo
           </button>
         </div>
       </section>
@@ -89,9 +87,9 @@ export default function LandingPage({ navigate, showToast }) {
           <div className="stat-label">Gridded Meteorological Data Source</div>
         </div>
         <div className="stat-card">
-          <div className="stat-number">+22%</div>
+          <div className="stat-number">Crop fit</div>
           <div className="stat-label">
-            Projected Yield Boost via Crop Rotation
+            Suggestions follow local climate, not a promised yield gain
           </div>
         </div>
         <div className="stat-card">
@@ -101,8 +99,10 @@ export default function LandingPage({ navigate, showToast }) {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-number">35%</div>
-          <div className="stat-label">Water Efficiency Improvement</div>
+          <div className="stat-number">Rainfall</div>
+          <div className="stat-label">
+            Water guidance from measured rain, not a fixed savings figure
+          </div>
         </div>
       </section>
 
@@ -162,6 +162,22 @@ export default function LandingPage({ navigate, showToast }) {
       <footer className="landing-footer">
         <div>
           © 2026 <strong>Field Shift Team</strong> — NASA Space Apps Challenge
+          {" · "}
+          <button
+            type="button"
+            onClick={() => navigate("/about")}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#047857",
+              font: "inherit",
+              fontWeight: 700,
+              cursor: "pointer",
+              padding: 0,
+            }}
+          >
+            About
+          </button>
         </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <ShieldCheck size={16} color="#10b981" />

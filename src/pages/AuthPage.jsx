@@ -13,9 +13,9 @@ import {
   EyeOff,
 } from "lucide-react";
 import "../styles/AuthPage.css";
+import { disableDemoMode } from "../lib/demo";
 
- const API_BASE_URL = "http://localhost:5000/api";
-//const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
+const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
 
 export default function AuthPage({ navigate, showToast, onAuthSuccess }) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -61,6 +61,7 @@ export default function AuthPage({ navigate, showToast, onAuthSuccess }) {
       // Store JWT token and user details in localStorage
       localStorage.setItem("field_shift_token", data.token);
       localStorage.setItem("field_shift_user", JSON.stringify(data.user));
+      disableDemoMode();
 
       if (onAuthSuccess) {
         onAuthSuccess(data.user, data.token);
@@ -73,7 +74,7 @@ export default function AuthPage({ navigate, showToast, onAuthSuccess }) {
         );
       } else {
         showToast(
-          "Successfully signed in to NASA Agroclimate Portal.",
+          "Successfully signed in to FieldShift.",
           "success",
         );
       }

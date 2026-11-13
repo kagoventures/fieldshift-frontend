@@ -12,6 +12,8 @@ import {
 import { MapPin, Sliders, Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "../styles/FarmMap.css";
+import { farmFromContext, fetchSavedFarmContext } from "../lib/farm";
+import { demoFarm, disableDemoMode, isDemoMode } from "../lib/demo";
 
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
 
@@ -58,52 +60,23 @@ function MapClickHandler({
 export default function FarmMapPage({ navigate, showToast }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loadState, setLoadState] = useState("loading");
+  const [loadError, setLoadError] = useState("");
   const [userEmail, setUserEmail] = useState("farmer@spaceapps.org");
 
-  // Form states as strings to prevent input desync
-  const [tempLat, setTempLat] = useState("5.6037");
-  const [tempLng, setTempLng] = useState("-0.1870");
+  // Empty until the saved farm arrives so Accra placeholders do not flash.
+  const [tempLat, setTempLat] = useState("");
+  const [tempLng, setTempLng] = useState("");
   const [tempCrop, setTempCrop] = useState("Maize");
-  const [tempSize, setTempSize] = useState("2.5");
-  const [locationName, setLocationName] = useState("Accra Test Field");
+  const [tempSize, setTempSize] = useState("");
+  const [locationName, setLocationName] = useState("");
 
   const hasFetchedRef = useRef(false);
-
-  // Fetch user's existing farm telemetry on mount
-  const fetchDashboardData = async () => {
-    const token = localStorage.getItem("field_shift_token");
-    if (!token) return;
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/farm`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-
-      if (response.ok && data.success && data.farmDetails) {
-        const { coordinates, locationName, currentCrop, fieldSize } =
-          data.farmDetails;
-        if (coordinates) {
-          setTempLat(coordinates.lat.toString());
-          setTempLng(coordinates.lng.toString());
-        }
-        if (locationName) setLocationName(locationName);
-        if (currentCrop) setTempCrop(currentCrop);
-        if (fieldSize)
-          setTempSize(fieldSize.toString().replace(" Hectares", ""));
-      }
-    } catch (err) {
-      console.error("Failed to load existing farm telemetry:", err);
-    }
-  };
 
   useEffect(() => {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
 
-    // Load user email/username from local storage
     const storedUser = localStorage.getItem("field_shift_user");
     if (storedUser) {
       try {
@@ -115,8 +88,39 @@ export default function FarmMapPage({ navigate, showToast }) {
       }
     }
 
-    fetchDashboardData();
+    loadSavedFarm();
   }, []);
+
+  const loadSavedFarm = async () => {
+    setLoadState("loading");
+    setLoadError("");
+    try {
+      if (isDemoMode()) {
+        setTempLat(String(demoFarm.coordinates.lat));
+        setTempLng(String(demoFarm.coordinates.lng));
+        setLocationName(demoFarm.resolvedLocation);
+        setTempCrop(demoFarm.currentCrop);
+        setTempSize(String(demoFarm.fieldSize));
+        setLoadState("ready");
+        return;
+      }
+      const ctx = await fetchSavedFarmContext();
+      const farm = farmFromContext(ctx);
+      if (farm.lat != null && farm.lng != null) {
+        setTempLat(String(farm.lat));
+        setTempLng(String(farm.lng));
+      }
+      if (farm.locationName) setLocationName(farm.locationName);
+      if (farm.currentCrop) setTempCrop(farm.currentCrop);
+      if (farm.fieldSize != null) {
+        setTempSize(String(farm.fieldSize).replace(/ Hectares/i, ""));
+      }
+      setLoadState("ready");
+    } catch (err) {
+      setLoadError(err.message || "Could not load your saved farm.");
+      setLoadState("error");
+    }
+  };
 
   const handlePreset = (name, lat, lng) => {
     setTempLat(lat.toString());
@@ -130,6 +134,12 @@ export default function FarmMapPage({ navigate, showToast }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isDemoMode()) {
+      if (showToast) {
+        showToast("Guest demo does not save. Sign in to store a farm.", "info");
+      }
+      return;
+    }
     setIsSaving(true);
 
     const parsedLat = parseFloat(tempLat);
@@ -188,6 +198,7 @@ export default function FarmMapPage({ navigate, showToast }) {
   };
 
   const handleLogout = () => {
+    disableDemoMode();
     sessionStorage.clear();
     localStorage.removeItem("field_shift_token");
     localStorage.removeItem("field_shift_user");
@@ -195,8 +206,10 @@ export default function FarmMapPage({ navigate, showToast }) {
     if (showToast) showToast("Signed out successfully.", "info");
   };
 
-  const numericLat = parseFloat(tempLat) || 5.6037;
-  const numericLng = parseFloat(tempLng) || -0.187;
+  const numericLat = parseFloat(tempLat);
+  const numericLng = parseFloat(tempLng);
+  const mapLat = Number.isFinite(numericLat) ? numericLat : 5.6037;
+  const mapLng = Number.isFinite(numericLng) ? numericLng : -0.187;
 
   return (
     <div className="app-layout">
@@ -221,6 +234,18 @@ export default function FarmMapPage({ navigate, showToast }) {
               </p>
             </div>
 
+            {loadState === "loading" ? (
+              <div className="page-status" role="status">
+                <Loader2 className="animate-spin" size={28} color="#10b981" />
+                <span>Loading your saved farm…</span>
+              </div>
+            ) : (
+            <>
+            {loadState === "error" && (
+              <p className="page-status page-status-error" role="alert">
+                {loadError} You can still drop a pin and save a farm.
+              </p>
+            )}
             <div className="map-grid-layout">
               <div className="map-canvas-card">
                 <h3 className="map-canvas-title">
@@ -238,7 +263,7 @@ export default function FarmMapPage({ navigate, showToast }) {
                   }}
                 >
                   <MapContainer
-                    center={[numericLat, numericLng]}
+                    center={[mapLat, mapLng]}
                     zoom={11}
                     style={{ height: "100%", width: "100%" }}
                   >
@@ -246,7 +271,7 @@ export default function FarmMapPage({ navigate, showToast }) {
                       attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <MapFlyTo lat={numericLat} lng={numericLng} />
+                    <MapFlyTo lat={mapLat} lng={mapLng} />
 
                     <MapClickHandler
                       setTempLat={setTempLat}
@@ -255,7 +280,7 @@ export default function FarmMapPage({ navigate, showToast }) {
                       showToast={showToast}
                     />
 
-                    <Marker position={[numericLat, numericLng]}>
+                    <Marker position={[mapLat, mapLng]}>
                       <Popup>
                         <strong>{tempCrop} Field</strong>
                         <br />
@@ -372,6 +397,8 @@ export default function FarmMapPage({ navigate, showToast }) {
                 </form>
               </div>
             </div>
+            </>
+            )}
           </div>
         </main>
       </div>

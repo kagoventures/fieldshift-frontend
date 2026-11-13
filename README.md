@@ -1,3 +1,7 @@
+# FieldShift
+
+React + Vite frontend for the FieldShift agroclimate app. What changed, and why, is in [CHANGES.md](CHANGES.md).
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

@@ -10,6 +10,15 @@ import {
   CloudSun,
 } from "lucide-react";
 import "../styles/Dashboard.css";
+import AssessmentDetails from "../components/AssessmentDetails";
+import {
+  demoAi,
+  demoAssessment,
+  demoClimateSummary,
+  demoFarm,
+  disableDemoMode,
+  isDemoMode,
+} from "../lib/demo";
 
 // const API_BASE_URL = "http://localhost:5000/api";
 const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api"
@@ -20,15 +29,11 @@ export default function DashboardPage({ navigate, showToast }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userEmail, setUserEmail] = useState("farmer@spaceapps.org");
 
-  const [farmData, setFarmData] = useState({
-    resolvedLocation: "Loading Region...",
-    coordinates: { lat: 5.6037, lng: -0.187 },
-    currentCrop: "Maize",
-    fieldSize: 2.5,
-  });
-
+  const [error, setError] = useState("");
+  const [farmData, setFarmData] = useState(null);
   const [climateSummary, setClimateSummary] = useState(null);
   const [aiRecommendation, setAiRecommendation] = useState(null);
+  const [assessment, setAssessment] = useState(null);
 
   // Ref guard to prevent double-fetching or infinite loops on re-mounts
   const hasFetchedRef = useRef(false);
@@ -52,6 +57,15 @@ export default function DashboardPage({ navigate, showToast }) {
 
   const fetchDashboardData = async () => {
     setIsLoading(true);
+    if (isDemoMode()) {
+      setError("");
+      setFarmData(demoFarm);
+      setClimateSummary(demoClimateSummary);
+      setAiRecommendation(demoAi);
+      setAssessment(demoAssessment);
+      setIsLoading(false);
+      return;
+    }
     const token = localStorage.getItem("field_shift_token");
 
     try {
@@ -68,10 +82,18 @@ export default function DashboardPage({ navigate, showToast }) {
         );
       }
 
+      setError("");
       setFarmData(data.farm);
       setClimateSummary(data.climateSummary);
       setAiRecommendation(data.aiRecommendation);
+      setAssessment({
+        supported: data.supported,
+        message: data.message,
+        provenance: data.provenance,
+        moisture: data.moisture,
+      });
     } catch (err) {
+      setError(err.message || "Failed to fetch personalized climate telemetry.");
       showToast(err.message, "error");
     } finally {
       setIsLoading(false);
@@ -79,6 +101,7 @@ export default function DashboardPage({ navigate, showToast }) {
   };
 
   const handleLogout = () => {
+    disableDemoMode();
     localStorage.removeItem("field_shift_token");
     localStorage.removeItem("field_shift_user");
     navigate("landing");
@@ -107,6 +130,10 @@ export default function DashboardPage({ navigate, showToast }) {
                 for your registered region and processed through our trained
                 decision tree classifier.
               </p>
+              <p className="dashboard-farm-note">
+                This overview is your registered primary farm. The Map page is
+                for checking other places.
+              </p>
             </div>
 
             {isLoading ? (
@@ -133,6 +160,10 @@ export default function DashboardPage({ navigate, showToast }) {
                   Resolving Geocoded Region & Querying NASA Satellites...
                 </span>
               </div>
+            ) : error || !farmData ? (
+              <p className="page-status page-status-error" role="alert">
+                {error || "No farm data was returned."}
+              </p>
             ) : (
               <>
                 <div className="stats-grid">
@@ -183,7 +214,9 @@ export default function DashboardPage({ navigate, showToast }) {
                       className="stat-value"
                       style={{ color: "#059669", fontSize: "18px" }}
                     >
-                      {aiRecommendation?.crop}
+                      {assessment?.supported === false
+                        ? "Outside Ghana"
+                        : aiRecommendation?.crop}
                     </div>
                     <span
                       className="stat-footer-tag"
@@ -193,6 +226,14 @@ export default function DashboardPage({ navigate, showToast }) {
                     </span>
                   </div>
                 </div>
+
+                <AssessmentDetails
+                  supported={assessment?.supported}
+                  message={assessment?.message}
+                  provenance={assessment?.provenance}
+                  moisture={assessment?.moisture}
+                  crops={aiRecommendation?.crops}
+                />
 
                 <div className="action-card">
                   <h3 className="action-card-title">Quick Navigation</h3>

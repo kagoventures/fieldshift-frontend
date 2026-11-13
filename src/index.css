@@ -39,6 +39,26 @@ code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+.page-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 8px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.page-status-error {
+  display: block;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  font-weight: 600;
+}
 html,
 body {
   overflow-x: hidden;
