@@ -18,9 +18,9 @@ import {
   disableDemoMode,
   isDemoMode,
 } from "../lib/demo";
+import { API_BASE_URL } from "../../utils/apiEndpoint";
 
-// const API_BASE_URL = "http://localhost:5000/api";
-const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
+
 
 export default function AiRecommendationsPage({ navigate, showToast }) {
   const [mobileOpen, setMobileOpen] = useState(false);

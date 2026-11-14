@@ -14,8 +14,8 @@ import "leaflet/dist/leaflet.css";
 import "../styles/FarmMap.css";
 import { farmFromContext, fetchSavedFarmContext } from "../lib/farm";
 import { demoFarm, disableDemoMode, isDemoMode } from "../lib/demo";
+import { API_BASE_URL } from "../../utils/apiEndpoint";
 
-const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
 
 // 1. Helper component to smoothly center/fly the map when coordinates change
 function MapFlyTo({ lat, lng }) {

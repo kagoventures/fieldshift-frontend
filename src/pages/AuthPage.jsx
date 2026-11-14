@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 import "../styles/AuthPage.css";
 import { disableDemoMode } from "../lib/demo";
+import { API_BASE_URL } from "../../utils/apiEndpoint";
 
-const API_BASE_URL = "https://nasa-space-challenge-backend.onrender.com/api";
 
 export default function AuthPage({ navigate, showToast, onAuthSuccess }) {
   const [isRegistering, setIsRegistering] = useState(false);
