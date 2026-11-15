@@ -1,5 +1,4 @@
-export const API_BASE_URL =
-  "https://nasa-space-challenge-backend.onrender.com/api";
+import { API_BASE_URL } from "../../utils/apiEndpoint";
 
 export function authHeaders() {
   const token = localStorage.getItem("field_shift_token");
