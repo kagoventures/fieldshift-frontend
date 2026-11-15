@@ -1,4 +1,3 @@
-import React from "react";
 import { Sprout } from "lucide-react";
 import "../styles/AboutPage.css";
 
@@ -62,8 +61,9 @@ export default function AboutPage({ navigate }) {
           </p>
           <p>
             The dashboard follows the region saved at registration. The map is
-            for checking another place. The guest demo is a fixed Accra sample
-            and does not call NASA.
+            for checking another place. The landing page can request a live
+            reading with no account. If that request fails, it shows the Accra
+            guest sample and labels it sample data.
           </p>
         </section>
       </main>

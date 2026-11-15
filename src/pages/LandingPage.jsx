@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Sprout,
   Globe,
@@ -9,7 +8,14 @@ import {
   MapPin,
 } from "lucide-react";
 import "../styles/LandingPage.css";
-import { enableDemoMode } from "../lib/demo";
+import GuestTry from "../components/GuestTry";
+
+function scrollToTry() {
+  document.getElementById("try-without-signup")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
 
 export default function LandingPage({ navigate }) {
   return (
@@ -29,6 +35,9 @@ export default function LandingPage({ navigate }) {
         <div className="nav-actions">
           <button className="btn-secondary" onClick={() => navigate("/about")}>
             About
+          </button>
+          <button className="btn-nav-try" type="button" onClick={scrollToTry}>
+            Try it
           </button>
           <button className="btn-secondary" onClick={() => navigate("/auth")}>
             Sign In
@@ -59,26 +68,23 @@ export default function LandingPage({ navigate }) {
         </p>
 
         <div className="hero-cta-group">
-          <button
-            className="btn-hero-main"
-            onClick={() => navigate("/dashboard")}
-          >
-            Explore Dashboard <ArrowRight size={18} />
+          <button className="btn-hero-main" type="button" onClick={scrollToTry}>
+            Try it without signing up <ArrowRight size={18} />
           </button>
           <button className="btn-secondary" onClick={() => navigate("/auth")}>
             Farmer Portal Log In
           </button>
           <button
             className="btn-secondary"
-            onClick={() => {
-              enableDemoMode();
-              navigate("/dashboard");
-            }}
+            type="button"
+            onClick={() => navigate("/dashboard")}
           >
-            Try guest demo
+            Explore Dashboard
           </button>
         </div>
       </section>
+
+      <GuestTry navigate={navigate} />
 
       {/* Stats Banner */}
       <section className="stats-strip">

@@ -67,3 +67,11 @@ The original app is on `main` (`Import original frontend`). This branch keeps th
 **What.** `/about` covers the problem, the POWER parameters (T2M, PRECTOTCORR, ALLSKY_SFC_SW_DWN), the annual-rainfall method, and links to [NASA POWER](https://power.larc.nasa.gov/). "Try guest demo" opens the dashboard on a labeled Accra sample and does not call the API. Sign-in or sign-out leaves demo mode.
 
 **Files.** `src/pages/AboutPage.jsx`, `src/styles/AboutPage.css`, `src/lib/demo.js`, `src/App.jsx`, `src/pages/LandingPage.jsx`, `src/components/Sidebar.jsx`, `src/components/Header.jsx`, `src/pages/AuthPage.jsx`, `src/pages/DashboardPage.jsx`, `src/pages/ClimateDataPage.jsx`, `src/pages/FarmMapPage.jsx`, `src/pages/AiRecommendationsPage.jsx`
+
+### 9. Judge path: live guest assessment, API URL, and static deploy
+
+**Why.** The API base was hardcoded to localhost, so a deployed site could not choose a host. The guest path only showed a canned Accra sample. Render’s free tier sleeps, and a cold first request looked like a hang. Client-side routes need a SPA fallback on a static host.
+
+**What.** `VITE_API_URL` overrides the API base. Dev still defaults to `http://localhost:5000/api`. A production build defaults to `https://nasa-space-challenge-backend.onrender.com/api`. The landing page pings the API root on load, shows a waking-up state, and calls `GET /api/public/assess` for Kumasi, Tamale, Wa, a map pin, or a typed region. A failed request shows the existing Accra sample with a Sample data label. The result lists NASA POWER, parameters `T2M`, `PRECTOTCORR`, and `ALLSKY_SFC_SW_DWN`, and the date range when the response includes one. `vercel.json` rewrites routes to `index.html`.
+
+**Files.** `utils/apiEndpoint.js`, `src/lib/farm.js`, `src/lib/publicAssess.js`, `src/components/GuestTry.jsx`, `src/styles/GuestTry.css`, `src/pages/LandingPage.jsx`, `src/pages/AboutPage.jsx`, `src/components/AssessmentDetails.jsx`, `vercel.json`, `.env.example`, `README.md`

@@ -1,5 +1,10 @@
-import React from "react";
 import "../styles/AssessmentDetails.css";
+
+function formatPowerDate(value) {
+  const text = String(value ?? "");
+  if (!/^\d{8}$/.test(text)) return text;
+  return `${text.slice(0, 4)}-${text.slice(4, 6)}-${text.slice(6, 8)}`;
+}
 
 function formatConfidence(value) {
   if (typeof value !== "number" || Number.isNaN(value)) return null;
@@ -55,8 +60,8 @@ export default function AssessmentDetails({
           {range?.start && (
             <span>
               {" "}
-              · {range.start}
-              {range.end ? `–${range.end}` : ""}
+              · {formatPowerDate(range.start)}
+              {range.end ? `–${formatPowerDate(range.end)}` : ""}
             </span>
           )}
           {provenance.community && (
